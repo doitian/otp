@@ -1,4 +1,4 @@
--module(tr_server_app).
+-module(tr_app).
 
 -behaviour(application).
 
@@ -10,7 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    tr_server_sup:start_link().
+    tr_sup:start_link().
 
 stop(_State) ->
     ok.

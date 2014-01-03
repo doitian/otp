@@ -1,13 +1,13 @@
 % -*- erlang -*-
-{application, tr_server,
+{application, tcp_rpc,
  [
-  {description, ""},
-  {vsn, "1"},
+  {description, "TCP RPC server."},
+  {vsn, "0.0.1"},
   {registered, []},
   {applications, [
                   kernel,
                   stdlib
                  ]},
-  {mod, { tr_server_app, []}},
+  {mod, { tr_app, []}},
   {env, []}
  ]}.
