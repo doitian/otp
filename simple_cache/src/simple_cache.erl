@@ -15,6 +15,7 @@ lookup(Key) ->
         {ok, Pid} ->
             sc_element:fetch(Pid);
         {error, _} ->
+            sc_event:lookup(Key),
             {error, not_found}
     end.
 

@@ -29,7 +29,7 @@ start_link(Key, Value, LeaseTime) ->
     gen_server:start_link(?MODULE, [Key, Value, LeaseTime], []).
 
 create(Key, Value, LeaseTime) ->
-    sc_sup:start_child(Key, Value, LeaseTime).
+    sc_element_sup:start_child(Key, Value, LeaseTime).
 create(Key, Value) ->
     create(Key, Value, ?DEFAULT_LEASE_TIME).
 
@@ -52,13 +52,19 @@ init([Key, Value, LeaseTime]) ->
                    value = Value,
                    lease_time = LeaseTime,
                    start_time = StartTime},
+    sc_event:create(Key, Value),
     {ok, State, time_left(StartTime, LeaseTime)}.
 
 handle_call(fetch, _From, State) ->
-    {reply, {ok, State#state.value}, State, time_left(State)}.
+    #state{key = Key, value = Value} = State,
+    sc_event:lookup(Key),
+    {reply, {ok, Value}, State, time_left(State)}.
 
 handle_cast({replace, Value}, State) ->
+    #state{key = Key} = State,
+    sc_event:replace(Key, Value),
     {noreply, State#state{value = Value}, time_left(State)};
+
 handle_cast(delete, State) ->
     {stop, normal, State}.
 
@@ -66,7 +72,9 @@ handle_info(timeout, State) ->
     {stop, normal, State}.
 
 terminate(_Reson, State) ->
-    sc_store:delete(State#state.key),
+    Key = State#state.key,
+    sc_event:delete(Key),
+    sc_store:delete(Key),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
